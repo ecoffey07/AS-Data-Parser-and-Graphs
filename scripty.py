@@ -49,27 +49,10 @@ def part2():
   as_relationships = pd.read_csv("2023.AS-rel.txt", sep = "|", comment = "#", header=None)
   # as_relationships.reset_index()
 
-  # Get the total amount of ASes
-  maxAS = as_relationships[0].max()
-  temp1 = as_relationships[0].tolist() # Get existing ASes to save processing power
-  temp2 = as_relationships[1].tolist()
-  ASList = list(set(temp1 + temp2)) # Remove duplicates
-  ASList.sort()
-
-  # Create a mapping between AS_i and all the data we will be collecting
-  # @dataclass
-  # class Entry:
-  #   ID: int
-  #   global_degree: int = 0
-  #   customer_degree: int = 0
-  #   peer_degree: int = 0
-  #   provider_degree: int = 0
   globalList = {}
   customerList = {}
   providerList = {}
   peerList = {}
-  
-  entryMap = {}
 
   for row in as_relationships.itertuples():
     if row._3 == 0:
@@ -179,8 +162,116 @@ def part2():
   plt.show()
 
 def part3():
-  print("TEMP")
+  ip_space = pd.read_csv("routeviews-rv6-20231105-1200.pfx2as.txt", sep = " ", comment = "#", header=None)
+  print(ip_space)
+  print("Do")
+
+def part4():
+  # Read in data 
+  as_relationships = pd.read_csv("2023.AS-rel.txt", sep = "|", comment = "#", header=None)
+  # as_relationships.reset_index()
+
+  # Get the total amount of ASes
+  maxAS = as_relationships[0].max()
+  temp1 = as_relationships[0].tolist() # Get existing ASes to save processing power
+  temp2 = as_relationships[1].tolist()
+  ASList = list(set(temp1 + temp2)) # Remove duplicates
+  ASList.sort()
+
+  globalList = {}
+  customerList = {}
+  providerList = {}
+  peerList = {}
+
+  for row in as_relationships.itertuples():
+    if row._3 == 0:
+      # Peer
+      skip1 = False
+      skip1global = False
+      skip2 = False
+      skip2global = False
+      if row._1 not in peerList:
+        peerList[row._1] = 1
+        skip1 = True
+      if row._2 not in peerList:
+        peerList[row._2] = 1
+        skip2 = True
+      if row._1 not in globalList:
+        globalList[row._1] = 1
+        skip1global = True
+      if row._2 not in globalList:
+        globalList[row._2] = 1
+        skip2global = True
+      if not skip1:
+        peerList[row._1] = peerList[row._1] + 1
+      if not skip1global:
+        globalList[row._1] = globalList[row._1] + 1
+      if not skip2:
+        peerList[row._2] = peerList[row._2] + 1
+      if not skip2global:
+        globalList[row._2] = globalList[row._2] + 1
+    else:
+      # Customer/Provider
+      # The AS in the first column is a provider to the AS customer in the second column
+      skip1 = False
+      skip1global = False
+      skip2 = False
+      skip2global = False
+      if row._1 not in customerList:
+        customerList[row._1] = 1
+        skip1 = True
+      if row._2 not in providerList:
+        providerList[row._2] = 1
+        skip2 = True
+      if row._1 not in globalList:
+        globalList[row._1] = 1
+        skip1global = True
+      if row._2 not in globalList:
+        globalList[row._2] = 1
+        skip2global = True
+      if not skip1:
+        customerList[row._1] = customerList[row._1] + 1
+      if not skip1global:
+        globalList[row._1] = globalList[row._1] + 1
+      if not skip2:
+        providerList[row._2] = providerList[row._2] + 1
+      if not skip2global:
+        globalList[row._2] = globalList[row._2] + 1
+  
+  transit_count = 0
+  entriprise_count = 0
+  content_count = 0
+
+  for i in ASList:
+    if i not in customerList:
+      # Enterprise or Content
+      if i not in peerList:
+        # Enterprise
+        entriprise_count += 1
+      else:
+        # Content
+        content_count += 1
+    else:
+      # Transit
+      transit_count += 1
+
+  class_data_2023 = [transit_count, entriprise_count, content_count]
+  X = ['Transit','Enterprise','Content']
+  X_axis = np.arange(len(X))
+
+  bars2023 = plt.bar(X_axis, class_data_2023, 0.4)
+  for bar in bars2023:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + 0.1, yval + 1000, yval)
+
+  plt.xticks(X_axis, X)
+  plt.xlabel("Types of Classes")
+  plt.ylabel("Number of ASes in Each Class")
+  plt.title("Identifcation of AS Class by 2023 Relationship Data")
+  plt.show()
+
 
 # part1()
-#part2()
+# part2()
 part3()
+# part4()
