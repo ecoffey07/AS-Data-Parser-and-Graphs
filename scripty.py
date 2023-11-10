@@ -162,9 +162,31 @@ def part2():
   plt.show()
 
 def part3():
-  ip_space = pd.read_csv("routeviews-rv6-20231105-1200.pfx2as.txt", sep = " ", comment = "#", header=None)
+  ip_space = pd.read_csv("routeviews-rv6-20231105-1200.pfx2as.txt", sep = "\t", comment = "#", header=None)
   print(ip_space)
-  print("Do")
+
+  spacelist = ip_space[1].to_list()
+  
+  X = ["0-25", "26-30", "31-32", "33-45", "36-37", "38-40", "41-43", "44-47", "47-50", "51-80", "80+"]
+  X_axis = np.arange(len(X))
+  bins=[0,25,30,32,35,37,40,43,46,50,80]
+  hist, bin_edges = np.histogram(spacelist,bins) # make the histogram
+  fig,ax = plt.subplots()
+  ax.bar(range(len(hist)),hist,width=1,align='center',tick_label=
+        ['{} - {}'.format(bins[i],bins[i+1]) for i,j in enumerate(hist)])
+  
+  i = 0
+  for bar in hist:
+    plt.text(X_axis[i] - 0.4, bar + 1000, bar)
+    i += 1
+
+  plt.xticks(X_axis, X)
+  plt.xlabel("Amount of ASes with given IP Space")
+  plt.ylabel("IP Space Size")
+  plt.title("IP space size histogram")
+  plt.show()
+
+
 
 def part4():
   # Read in data 
