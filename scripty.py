@@ -51,53 +51,136 @@ def part2():
 
   # Get the total amount of ASes
   maxAS = as_relationships[0].max()
-
-  # TEMPLATE BELOW:
-  # Get the providers / possible peers
-  #     provider_peer = as_relationships[as_relationships[0] == 42]
-  # Filter out the peers from the providers
-  #     peer1 = provider_peer[provider_peer[2] == 0]
-  #     peer1.reset_index()
-  # Filter out the providers from the peers
-  #     provider = provider_peer[provider_peer[2] == -1]
-  # Get the customers / possible peers
-  #     customer_peer = as_relationships[as_relationships[1] == 42]
-  # Filter out the peers from the customers
-  #     peer2 = customer_peer[customer_peer[2] == 0]
-  # Swap the first and second columns of the peers to line it up with the first group
-  #     peer2 = peer2[peer2.columns[[1,0,2,3]]]
-  #     peer2.reset_index()
-  # Filter out the customers from the pe
-  #     customer = customer_peer[customer_peer[2] == -1]
-  # Combine both frames of peers into one and drop any duplicate data points
-  #     peers = pd.concat([peer1,peer2]).drop_duplicates().reset_index(drop=True)
-  # END TEMPLATE
-  
-  print("Total providers for 42 " + str(len(provider)))
-  print("Total customers for 42 " + str(len(customer)))
-  print("Total peers for 42 " + str((len(peer1) + len(peer2))))
+  temp1 = as_relationships[0].tolist() # Get existing ASes to save processing power
+  temp2 = as_relationships[1].tolist()
+  ASList = list(set(temp1 + temp2)) # Remove duplicates
+  ASList.sort()
 
   # Create a mapping between AS_i and all the data we will be collecting
-  @dataclass
-  class Entry:
-    ID: int
-    global_degree: int = 0
-    customer_degree: int = 0
-    peer_degree: int = 0
-    provider_degree: int = 0
+  # @dataclass
+  # class Entry:
+  #   ID: int
+  #   global_degree: int = 0
+  #   customer_degree: int = 0
+  #   peer_degree: int = 0
+  #   provider_degree: int = 0
+  globalList = {}
+  customerList = {}
+  providerList = {}
+  peerList = {}
   
   entryMap = {}
 
-  for i in range(maxAS):
-    # Following template as shown and commented above
-    provider_peer = as_relationships[as_relationships[0] == i]
-    peer1 = provider_peer[provider_peer[2] == 0]
-    peer1.reset_index()
-    provider = provider_peer[provider_peer[2] == -1]
-
-  #for row in as_relationships.itertuples():
+  for row in as_relationships.itertuples():
+    if row._3 == 0:
+      # Peer
+      skip1 = False
+      skip1global = False
+      skip2 = False
+      skip2global = False
+      if row._1 not in peerList:
+        peerList[row._1] = 1
+        skip1 = True
+      if row._2 not in peerList:
+        peerList[row._2] = 1
+        skip2 = True
+      if row._1 not in globalList:
+        globalList[row._1] = 1
+        skip1global = True
+      if row._2 not in globalList:
+        globalList[row._2] = 1
+        skip2global = True
+      if not skip1:
+        peerList[row._1] = peerList[row._1] + 1
+      if not skip1global:
+        globalList[row._1] = globalList[row._1] + 1
+      if not skip2:
+        peerList[row._2] = peerList[row._2] + 1
+      if not skip2global:
+        globalList[row._2] = globalList[row._2] + 1
+    else:
+      # Customer/Provider
+      # The AS in the first column is a provider to the AS customer in the second column
+      skip1 = False
+      skip1global = False
+      skip2 = False
+      skip2global = False
+      if row._1 not in customerList:
+        customerList[row._1] = 1
+        skip1 = True
+      if row._2 not in providerList:
+        providerList[row._2] = 1
+        skip2 = True
+      if row._1 not in globalList:
+        globalList[row._1] = 1
+        skip1global = True
+      if row._2 not in globalList:
+        globalList[row._2] = 1
+        skip2global = True
+      if not skip1:
+        customerList[row._1] = customerList[row._1] + 1
+      if not skip1global:
+        globalList[row._1] = globalList[row._1] + 1
+      if not skip2:
+        providerList[row._2] = providerList[row._2] + 1
+      if not skip2global:
+        globalList[row._2] = globalList[row._2] + 1
   
-    
+  X = ["0", "1", "2-5", "6-100", "101-200", "201-1000", "1000+"]
+  X_axis = np.arange(len(X))
+  bins=[0,1,2,5,100,200,1000]
+  hist, bin_edges = np.histogram(list(globalList.values()),bins) # make the histogram
+  fig,ax = plt.subplots()
+  ax.bar(range(len(hist)),hist,width=1,align='center',tick_label=
+        ['{} - {}'.format(bins[i],bins[i+1]) for i,j in enumerate(hist)])
+  plt.xticks(X_axis, X)
+  plt.xlabel("Amount of Global Connections")
+  plt.ylabel("Number of ASes")
+  plt.title("Global Degree (All Connections) Histogram")
+  plt.show()
+
+  plt.figure()
+
+  bins=[0,1,2,5,100,200,1000]
+  hist, bin_edges = np.histogram(list(customerList.values()),bins) # make the histogram
+  fig,ax = plt.subplots()
+  ax.bar(range(len(hist)),hist,width=1,align='center',tick_label=
+        ['{} - {}'.format(bins[i],bins[i+1]) for i,j in enumerate(hist)])
+  plt.xticks(X_axis, X)
+  plt.xlabel("Amount of Customer Connections")
+  plt.ylabel("Number of ASes")
+  plt.title("Customer Degree Histogram")
+  plt.show()
+
+  plt.figure()
+
+  bins=[0,1,2,5,100,200,1000]
+  hist, bin_edges = np.histogram(list(peerList.values()),bins) # make the histogram
+  fig,ax = plt.subplots()
+  ax.bar(range(len(hist)),hist,width=1,align='center',tick_label=
+        ['{} - {}'.format(bins[i],bins[i+1]) for i,j in enumerate(hist)])
+  plt.xticks(X_axis, X)
+  plt.xlabel("Amount of Peer Connections")
+  plt.ylabel("Number of ASes")
+  plt.title("Peer Degree Histogram")
+  plt.show()
+
+  plt.figure()
+  
+  bins=[0,1,2,5,100,200,1000]
+  hist, bin_edges = np.histogram(list(providerList.values()),bins) # make the histogram
+  fig,ax = plt.subplots()
+  ax.bar(range(len(hist)),hist,width=1,align='center',tick_label=
+        ['{} - {}'.format(bins[i],bins[i+1]) for i,j in enumerate(hist)])
+  plt.xticks(X_axis, X)
+  plt.xlabel("Amount of Provider Connections")
+  plt.ylabel("Number of ASes")
+  plt.title("Provider Degree Histogram")
+  plt.show()
+
+def part3():
+  print("TEMP")
 
 # part1()
-part2()
+#part2()
+part3()
