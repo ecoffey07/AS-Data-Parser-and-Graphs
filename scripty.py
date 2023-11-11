@@ -187,7 +187,6 @@ def part3():
   plt.show()
 
 
-
 def part4():
   # Read in data 
   as_relationships = pd.read_csv("2023.AS-rel.txt", sep = "|", comment = "#", header=None)
@@ -292,8 +291,123 @@ def part4():
   plt.title("Identifcation of AS Class by 2023 Relationship Data")
   plt.show()
 
+def part5():
+  # Read in data 
+  as_relationships = pd.read_csv("2023.AS-rel.txt", sep = "|", comment = "#", header=None)
+  # as_relationships.reset_index()
+
+  connections = {}
+
+  globalList = {}
+  customerList = {}
+  providerList = {}
+  peerList = {}
+
+  for row in as_relationships.itertuples():
+    if row._3 == 0:
+      # Peer
+      skip1 = False
+      skip1global = False
+      skip2 = False
+      skip2global = False
+      if row._1 not in peerList:
+        peerList[row._1] = 1
+        skip1 = True
+      if row._2 not in peerList:
+        peerList[row._2] = 1
+        skip2 = True
+      if row._1 not in globalList:
+        globalList[row._1] = 1
+        skip1global = True
+      if row._2 not in globalList:
+        globalList[row._2] = 1
+        skip2global = True
+      if not skip1:
+        peerList[row._1] = peerList[row._1] + 1
+      if not skip1global:
+        globalList[row._1] = globalList[row._1] + 1
+      if not skip2:
+        peerList[row._2] = peerList[row._2] + 1
+      if not skip2global:
+        globalList[row._2] = globalList[row._2] + 1
+    else:
+      # Customer/Provider
+      # The AS in the first column is a provider to the AS customer in the second column
+      skip1 = False
+      skip1global = False
+      skip2 = False
+      skip2global = False
+      if row._1 not in customerList:
+        customerList[row._1] = 1
+        skip1 = True
+      if row._2 not in providerList:
+        providerList[row._2] = 1
+        skip2 = True
+      if row._1 not in globalList:
+        globalList[row._1] = 1
+        skip1global = True
+      if row._2 not in globalList:
+        globalList[row._2] = 1
+        skip2global = True
+      if not skip1:
+        customerList[row._1] = customerList[row._1] + 1
+      if not skip1global:
+        globalList[row._1] = globalList[row._1] + 1
+      if not skip2:
+        providerList[row._2] = providerList[row._2] + 1
+      if not skip2global:
+        globalList[row._2] = globalList[row._2] + 1
+
+  print("Creating connections")
+
+  for row in as_relationships.itertuples():
+    if row._1 not in connections:
+      connections[row._1] = []
+      connections[row._1].append(row._2)
+    else:
+      connections[row._1].append(row._2)
+      # connections[row._1] = list(set(connections[row._1]))
+    if row._2 not in connections:
+      connections[row._2] = []
+      connections[row._2].append(row._1)
+    else:
+      connections[row._2].append(row._1)
+      # connections[row._2] = list(set(connections[row._2]))
+  
+  print("Finished creating connections, creating cliquea")
+  
+  # sortedGlobal = sorted(globalList, reverse=True) # Sort greatest to least
+  globalList = dict(sorted(globalList.items(), key=lambda item: item[1], reverse=True))
+  sortedGlobal = list(globalList.keys())
+  Set = []
+  for AS in sortedGlobal:
+    if len(Set) == 0:
+      print("Adding default " + str(AS))
+      print(globalList[AS])
+      print()
+      Set.append(AS)
+      continue
+    connectionList = connections[AS]
+    terminate = False
+    for setvalue in Set:
+      if setvalue not in connectionList and len(Set) > 10:
+        terminate = True
+        break
+        # continue
+    if terminate == True:
+      terminate = False
+      # break
+      continue
+    # Did not terminate, add to list
+    print("Adding AS " + str(AS))
+    Set.append(AS)
+    # Check if the connectionList contains every value in the Set
+  print("Connections analysed: ")
+  print(Set)
+  print("Size: " + str(len(Set)))
 
 # part1()
 # part2()
-part3()
+# part3()
 # part4()
+part5()
