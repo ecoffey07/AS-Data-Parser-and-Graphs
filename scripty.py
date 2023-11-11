@@ -108,6 +108,23 @@ def part2():
         providerList[row._2] = providerList[row._2] + 1
       if not skip2global:
         globalList[row._2] = globalList[row._2] + 1
+
+  # Add the zeros!
+  for row in as_relationships.itertuples():
+    if row._1 not in customerList:
+      customerList[row._1] = 0
+    if row._2 not in customerList:
+      customerList[row._2] = 0
+    
+    if row._1 not in providerList:
+      providerList[row._1] = 0
+    if row._2 not in providerList:
+      providerList[row._2] = 0
+    
+    if row._1 not in peerList:
+      peerList[row._1] = 0
+    if row._2 not in peerList:
+      peerList[row._2] = 0
   
   X = ["0", "1", "2-5", "6-100", "101-200", "201-1000", "1000+"]
   X_axis = np.arange(len(X))
@@ -407,7 +424,7 @@ def part5():
   print("Size: " + str(len(Set)))
 
 # part1()
-# part2()
+part2()
 # part3()
 # part4()
-part5()
+# part5()
