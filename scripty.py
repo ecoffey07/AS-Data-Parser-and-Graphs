@@ -198,8 +198,8 @@ def part3():
     i += 1
 
   plt.xticks(X_axis, X)
-  plt.xlabel("Amount of ASes with given IP Space")
-  plt.ylabel("IP Space Size")
+  plt.ylabel("Amount of ASes with given IP Space")
+  plt.xlabel("IP Space Size")
   plt.title("IP space size histogram")
   plt.show()
 
@@ -424,7 +424,7 @@ def part5():
   print("Size: " + str(len(Set)))
 
 # part1()
-part2()
-# part3()
+# part2()
+part3()
 # part4()
 # part5()
